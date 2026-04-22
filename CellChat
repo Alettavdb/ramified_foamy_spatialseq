@@ -585,3 +585,339 @@ ggplot(df_freq, aes(x = Target_name, y = Source_name, fill = frequency)) +
   labs(x = "Target Type", y = "Source Type", fill = "Frequency", title= paste0(invest, " ", 'PeriR')) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+#Now look at lymphocytes deconvoluted with Azimuth to look at cell-cell interactions
+#CELLCHAT OF LYMPHOCYTES
+library(igraph)
+library(ggraph)
+
+Assays(seurat_obj)
+
+
+df <- read_excel("CellReports_RB2/CellChat data/Results_all.xlsx")
+clusters_to_remove <- c("C1", "C3", "C5", "T cells", "Plasmablasts")
+clusters_of_interest <- c("C0", "C2", "C4", "C6", "C7")
+
+df_filtered_source <- df %>%
+  filter(
+    source %in% clusters_of_interest
+  )
+df_filtered_source <- df_filtered_source %>%
+  filter(
+    !source %in% clusters_to_remove,
+    !target %in% clusters_to_remove
+  )
+
+interaction_counts_source <- df_filtered_source %>%
+  group_by(source, target, Region) %>%
+  summarise(
+    n_interactions = n(),
+    total_prob = sum(prob),
+    .groups = "drop"
+  )
+
+interaction_counts_source_foamy <- subset(interaction_counts_source, Region == "foamy")
+interaction_counts_source_rami <- subset(interaction_counts_source, Region == "ramified")
+
+graph <- graph_from_data_frame(
+  interaction_counts_source_foamy,
+  directed = TRUE
+)
+
+ggraph(graph, layout = "circle") +
+  geom_edge_link(
+    aes(width = n_interactions),
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    end_cap = circle(3, "mm"),
+    start_cap = circle(3, "mm"),
+    alpha = 0.7
+    ) +
+  geom_node_point(size = 3) +
+  geom_node_text(
+    aes(label = name),
+    repel = TRUE,
+    vjust = 1.5
+  ) +
+  scale_edge_width(range = c(0.5, 3)) +
+  theme_void()
+
+ggraph(graph, layout = "circle") +
+  geom_edge_link(
+    aes(width = n_interactions),
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    end_cap = circle(3, "mm"),
+    start_cap = circle(3, "mm"),
+    alpha = 0.7
+  ) +
+  geom_node_point(size = 3) +
+  scale_edge_width(range = c(0.5, 3)) +
+  theme_void()
+
+graph <- graph_from_data_frame(
+  interaction_counts_source_rami,
+  directed = TRUE
+)
+
+ggraph(graph, layout = "circle") +
+  geom_edge_link(
+    aes(width = n_interactions),
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    end_cap = circle(3, "mm"),
+    start_cap = circle(3, "mm"),
+    alpha = 0.7
+  ) +
+  geom_node_point(size = 3) +
+  geom_node_text(
+    aes(label = name),
+    repel = TRUE,
+    vjust = 1.5
+  ) +
+  scale_edge_width(range = c(0.5, 3)) +
+  theme_void()
+
+ggraph(graph, layout = "circle") +
+  geom_edge_link(
+    aes(width = n_interactions),
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    end_cap = circle(3, "mm"),
+    start_cap = circle(3, "mm"),
+    alpha = 0.7
+  ) +
+  geom_node_point(size = 3) +
+  scale_edge_width(range = c(0.5, 3)) +
+  theme_void()
+
+#now target
+
+df_filtered_target <- df %>%
+  filter(
+    target %in% clusters_of_interest
+  )
+df_filtered_target <- df_filtered_target %>%
+  filter(
+    !source %in% clusters_to_remove,
+    !target %in% clusters_to_remove
+  )
+
+interaction_counts_target <- df_filtered_target %>%
+  group_by(source, target, Region) %>%
+  summarise(
+    n_interactions = n(),
+    total_prob = sum(prob),
+    .groups = "drop"
+  )
+
+interaction_counts_target_foamy <- subset(interaction_counts_target, Region == "foamy")
+interaction_counts_target_rami <- subset(interaction_counts_target, Region == "ramified")
+
+graph <- graph_from_data_frame(
+  interaction_counts_target_foamy,
+  directed = TRUE
+)
+
+ggraph(graph, layout = "circle") +
+  geom_edge_link(
+    aes(width = n_interactions),
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    end_cap = circle(3, "mm"),
+    start_cap = circle(3, "mm"),
+    alpha = 0.7
+  ) +
+  geom_node_point(size = 3) +
+  geom_node_text(
+    aes(label = name),
+    repel = TRUE,
+    vjust = 1.5
+  ) +
+  scale_edge_width(range = c(0.5, 3)) +
+  theme_void()
+
+ggraph(graph, layout = "circle") +
+  geom_edge_link(
+    aes(width = n_interactions),
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    end_cap = circle(3, "mm"),
+    start_cap = circle(3, "mm"),
+    alpha = 0.7
+  ) +
+  geom_node_point(size = 3) +
+  scale_edge_width(range = c(0.5, 3)) +
+  theme_void()
+
+graph <- graph_from_data_frame(
+  interaction_counts_target_rami,
+  directed = TRUE
+)
+
+ggraph(graph, layout = "circle") +
+  geom_edge_link(
+    aes(width = n_interactions),
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    end_cap = circle(3, "mm"),
+    start_cap = circle(3, "mm"),
+    alpha = 0.7
+  ) +
+  geom_node_point(size = 3) +
+  geom_node_text(
+    aes(label = name),
+    repel = TRUE,
+    vjust = 1.5
+  ) +
+  scale_edge_width(range = c(0.5, 3)) +
+  theme_void()
+
+ggraph(graph, layout = "circle") +
+  geom_edge_link(
+    aes(width = n_interactions),
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    end_cap = circle(3, "mm"),
+    start_cap = circle(3, "mm"),
+    alpha = 0.7
+  ) +
+  geom_node_point(size = 3) +
+  scale_edge_width(range = c(0.5, 3)) +
+  theme_void()
+
+
+
+
+library(circlize)
+
+df_lymfsource_foamy <- read_excel("CellReports_RB2/CellChat data/Results_all.xlsx", 
+                                  sheet = "lymf_source_foamy")
+
+df_lymfsource_foamy$weight <- 1
+df_lymfsource_foamy_matrix <- xtabs(weight ~ source + target, data = df_lymfsource_foamy)
+
+circos.clear()
+
+# Draw the chord diagram
+chordDiagram(
+  df_lymfsource_foamy_matrix,
+  annotationTrack = c("grid", "axis"))
+
+# Add angled labels
+circos.trackPlotRegion(
+  track.index = get.current.track.index(),
+  bg.border = NA,
+  panel.fun = function(x, y) {
+    sector = get.cell.meta.data("sector.index")
+    xlim   = get.cell.meta.data("xlim")
+    ylim   = get.cell.meta.data("ylim")
+    
+    circos.text(
+      x = mean(xlim),
+      y = ylim[1] - 0.1,
+      labels = sector,
+      facing = "clockwise",
+      niceFacing = TRUE,
+      adj = c(0.5, 0.5),
+      cex = 0.9
+    )
+  }
+)
+
+
+df_lymfsource_rami <- read_excel("CellReports_RB2/CellChat data/Results_all.xlsx", 
+                                  sheet = "lymf_source_rami")
+
+df_lymfsource_rami$weight <- 1
+df_lymfsource_rami_matrix <- xtabs(weight ~ source + target, data = df_lymfsource_rami)
+
+circos.clear()
+
+# Draw the chord diagram
+chordDiagram(
+  df_lymfsource_rami_matrix,
+  annotationTrack = c("grid", "axis"))
+
+# Add angled labels
+circos.trackPlotRegion(
+  track.index = get.current.track.index(),
+  bg.border = NA,
+  panel.fun = function(x, y) {
+    sector = get.cell.meta.data("sector.index")
+    xlim   = get.cell.meta.data("xlim")
+    ylim   = get.cell.meta.data("ylim")
+    
+    circos.text(
+      x = mean(xlim),
+      y = ylim[1] - 0.1,
+      labels = sector,
+      facing = "clockwise",
+      niceFacing = TRUE,
+      adj = c(0.5, 0.5),
+      cex = 0.9
+    )
+  }
+)
+
+df_lymftarget_foamy <- read_excel("CellReports_RB2/CellChat data/Results_all.xlsx", 
+                                  sheet = "lymf_target_foamy")
+
+df_lymftarget_foamy$weight <- 1
+df_lymftarget_foamy_matrix <- xtabs(weight ~ source + target, data = df_lymftarget_foamy)
+
+circos.clear()
+
+# Draw the chord diagram
+chordDiagram(
+  df_lymftarget_foamy_matrix,
+  annotationTrack = c("grid", "axis"))
+
+# Add angled labels
+circos.trackPlotRegion(
+  track.index = get.current.track.index(),
+  bg.border = NA,
+  panel.fun = function(x, y) {
+    sector = get.cell.meta.data("sector.index")
+    xlim   = get.cell.meta.data("xlim")
+    ylim   = get.cell.meta.data("ylim")
+    
+    circos.text(
+      x = mean(xlim),
+      y = ylim[1] - 0.1,
+      labels = sector,
+      facing = "clockwise",
+      niceFacing = TRUE,
+      adj = c(0.5, 0.5),
+      cex = 0.9
+    )
+  }
+)
+
+
+df_lymftarget_rami <- read_excel("CellReports_RB2/CellChat data/Results_all.xlsx", 
+                                  sheet = "lymf_target_rami")
+
+df_lymftarget_rami$weight <- 1
+df_lymftarget_rami_matrix <- xtabs(weight ~ source + target, data = df_lymftarget_rami)
+
+circos.clear()
+
+# Draw the chord diagram
+chordDiagram(
+  df_lymftarget_rami_matrix,
+  annotationTrack = c("grid", "axis"))
+
+# Add angled labels
+circos.trackPlotRegion(
+  track.index = get.current.track.index(),
+  bg.border = NA,
+  panel.fun = function(x, y) {
+    sector = get.cell.meta.data("sector.index")
+    xlim   = get.cell.meta.data("xlim")
+    ylim   = get.cell.meta.data("ylim")
+    
+    circos.text(
+      x = mean(xlim),
+      y = ylim[1] - 0.1,
+      labels = sector,
+      facing = "clockwise",
+      niceFacing = TRUE,
+      adj = c(0.5, 0.5),
+      cex = 0.9
+    )
+  }
+)
