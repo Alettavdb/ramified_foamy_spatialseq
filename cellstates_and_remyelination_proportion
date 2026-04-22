@@ -1,0 +1,83 @@
+#Compare if cell states are associated with remyelinated proportion of the donor throughout the CNS
+
+cellstates_dems <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/Cell_proportions/Celltypes_state.xlsx",
+                              sheet="all_dems")
+
+senescent_opc_remyel_glm_fixed <- glm(Dens_opc_senescent ~ PrR + DonorID + Region, family = 'quasipoisson', data = cellstates_dems)
+anova(senescent_opc_remyel_glm_fixed)
+summary(senescent_opc_remyel_glm_fixed)
+
+stressed_opc_remyel_glm_fixed <- glm(Dens_opc_stressed ~ PrR + DonorID + Region, family = 'quasipoisson', data = cellstates_dems)
+anova(stressed_opc_remyel_glm_fixed)
+summary(stressed_opc_remyel_glm_fixed)
+
+ggplot(cellstates_dems, aes(x=PrR, y=Dens_opc_stressed))+
+  geom_point()+
+  geom_smooth(method=lm, se=TRUE)+
+  theme_minimal()
+
+ggplot(cellstates_dems, aes(x=PrR, y=Dens_opc_senescent))+
+  geom_point()+
+  geom_smooth(method=lm)+
+  theme_minimal()
+
+stressed_opc_remyel_glm_fixed <- glm(Dens_opc_stressed ~ PrR + DonorID, family = 'quasipoisson', data = cellstates_dems)
+anova(stressed_opc_remyel_glm_fixed)
+summary(stressed_opc_remyel_glm_fixed)
+
+senescent_opc_remyel_glm_fixed <- glm(Dens_opc_senescent ~ PrR + DonorID, family = 'quasipoisson', data = cellstates_dems)
+anova(senescent_opc_remyel_glm_fixed)
+summary(senescent_opc_remyel_glm_fixed)
+
+cellstates_dems_PeriR <- subset(cellstates_dems, Region == "Peri-lesion ramified")
+cellstates_dems_borderR <- subset(cellstates_dems, Region == "Border ramified")
+cellstates_dems_PeriF <- subset(cellstates_dems, Region == "Peri-lesion foamy")
+cellstates_dems_borderF <- subset(cellstates_dems, Region == "Border foamy")
+cellstates_dems_NAWM <- subset(cellstates_dems, Region == "NAWM")
+
+cor.test(cellstates_dems_PeriR$PrR, cellstates_dems_PeriR$Dens_opc_homeostatic) #p=0.5054
+cor.test(cellstates_dems_borderR$PrR, cellstates_dems_borderR$Dens_opc_homeostatic) #p=0.4911
+cor.test(cellstates_dems_PeriF$PrR, cellstates_dems_PeriF$Dens_opc_homeostatic) #p=0.2099
+cor.test(cellstates_dems_borderF$PrR, cellstates_dems_borderF$Dens_opc_homeostatic) #p=0.1684
+cor.test(cellstates_dems_NAWM$PrR, cellstates_dems_NAWM$Dens_opc_homeostatic) #p=0.9583
+
+cor.test(cellstates_dems_PeriR$PrR, cellstates_dems_PeriR$Dens_opc_stressed) #p=0.0277, r=-0.81, padj=0.0923
+cor.test(cellstates_dems_borderR$PrR, cellstates_dems_borderR$Dens_opc_stressed) #p=0.05647, r=-0.74, padj=0.1412
+cor.test(cellstates_dems_PeriF$PrR, cellstates_dems_PeriF$Dens_opc_stressed) #p=0.09613, r=-0.68, padj=0.2136
+cor.test(cellstates_dems_borderF$PrR, cellstates_dems_borderF$Dens_opc_stressed) #p=0.00615, r=-0.897, padj=0.0923
+cor.test(cellstates_dems_NAWM$PrR, cellstates_dems_NAWM$Dens_opc_stressed) #p=0.04558, r=-0.76, padj=0.1303
+
+cor.test(cellstates_dems_PeriR$PrR, cellstates_dems_PeriR$Dens_opc_immune) #p=0.9376
+cor.test(cellstates_dems_borderR$PrR, cellstates_dems_borderR$Dens_opc_immune) #p=0.9829
+cor.test(cellstates_dems_PeriF$PrR, cellstates_dems_PeriF$Dens_opc_immune) #p=0.9492
+cor.test(cellstates_dems_borderF$PrR, cellstates_dems_borderF$Dens_opc_immune) #p=0.6305
+cor.test(cellstates_dems_NAWM$PrR, cellstates_dems_NAWM$Dens_opc_immune) #p=0.8966
+
+cor.test(cellstates_dems_PeriR$PrR, cellstates_dems_PeriR$Dens_opc_senescent) #p=0.0187, r=-0.84, padj=0.0923
+cor.test(cellstates_dems_borderR$PrR, cellstates_dems_borderR$Dens_opc_senescent) #p=0.02421, r=-0.82, padj=0.0923
+cor.test(cellstates_dems_PeriF$PrR, cellstates_dems_PeriF$Dens_opc_senescent) #p=0.01408, r=-0.83, padj=0.0923
+cor.test(cellstates_dems_borderF$PrR, cellstates_dems_borderF$Dens_opc_senescent) #p=0.01568, r=-0.85, padj=0.0923
+cor.test(cellstates_dems_NAWM$PrR, cellstates_dems_NAWM$Dens_opc_senescent) #p=0.3938, r=-0.38, padj = 0.6563
+
+
+cellstates_dems_no_centres <- subset(cellstates_dems, Centres == "No")
+ggplot(cellstates_dems_no_centres, aes(x=PrR, y=Dens_opc_homeostatic, color=Region))+
+  geom_point()+
+  geom_smooth(method=lm, se=FALSE)+
+  theme_minimal()
+ggplot(cellstates_dems_no_centres, aes(x=PrR, y=Dens_opc_stressed, color=Region))+
+  geom_point()+
+  geom_smooth(method=lm, se=FALSE)+
+  theme_minimal()
+ggplot(cellstates_dems_no_centres, aes(x=PrR, y=Dens_opc_immune, color=Region))+
+  geom_point()+
+  geom_smooth(method=lm, se=FALSE)+
+  theme_minimal()
+ggplot(cellstates_dems_no_centres, aes(x=PrR, y=Dens_opc_senescent, color=Region))+
+  geom_point()+
+  geom_smooth(method=lm, se=FALSE)+
+  theme_minimal()
+P_correlations <- c(0.5054, 0.0277, 0.9376, 0.0187, 0.4911, 0.05647, 0.9829, 0.02421, 0.2099, 0.09613, 0.9492, 0.01408, 0.1684, 0.00615, 0.6305, 0.01568, 0.9583, 0.04558, 0.8966, 0.3938)
+P_correlations_adj <- p.adjust(P_correlations, method = "BH")
+P_correlations_adj
+
