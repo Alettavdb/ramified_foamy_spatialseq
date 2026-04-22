@@ -1,0 +1,548 @@
+#######DE GENE ANALYSIS#############
+
+#DE genes of interest border F vs border R
+
+borderF_vs_borderR <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/SingeCell_level_region_comparison/merged_Border_foamy-Border_ramified.xlsx")
+
+interests <- c("UBB", "TSPO", "FCGR2B","FCGR1A", "QKI","BCAS1","ABCA2","CTTN","NRX1","SHTN1","CTNNB1","BOK","APOD", "SPP1", "ABCA1", "C1QC", "C1QA","IGLC2","CHIT1","IGLC3","IGLC3","IGHG1","GPNMB","HLA-DQB1","APOC1","JCHAIN","FABP5","IGKC","VIM","APOE","CHI3L1","HLA-DRB1","IGHG3","B2M","AQP4","CD44","CD99","FTL","C3","C1QB","C1QC","FTH1","CD68")
+#PGN_genelist <- read_excel("Z:/Immuno/Aletta vd Bosch/x For others/Jon/PGN genelist.xlsx")
+#interests <- PGN_genelist$Gene
+#removed intests for the sake of readibility: "FCGR3A","MSR1","CHI3L2"
+#rebuttal interests in endothelial changse
+#interests <- c("CLDN5","CLDN3","CLDN12","OCLN","JAM2","JAM3","TJP1","TJP2","CDH5","MFSD2A","ABCB1","SLC2A1","GLUT1","ICAM1","VCAM1","SELE","ANGPT2","TIE2","PLVAP","HIF1A","IL1B", "TNF","CXCL10","CCL2","STAT1","IRF1","PDGFRB")
+
+filtered_data <- dplyr::filter(borderF_vs_borderR, Gene %in% interests)
+filtered_data <- subset(filtered_data, p_val_adj <0.05|p_val_adj==0.05)
+if (nrow(filtered_data) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data)
+}
+
+
+borderF_vs_borderR$color_group <- with(borderF_vs_borderR, ifelse(
+  p_val_adj <= 0.05 & avg_log2FC > 0, "up",
+  ifelse(p_val_adj <= 0.05 & avg_log2FC < 0, "down", "not_significant")
+))
+
+borderFvsR <- ggplot(borderF_vs_borderR, 
+                     aes(x = avg_log2FC, 
+                         y = ifelse(p_val_adj == 0, -log10(1e-10), -log10(p_val_adj)))) +
+  geom_point(aes(color = color_group), alpha = 0.8) +
+  scale_color_manual(values = c("up" = "orange", 
+                                "down" = "lightblue", 
+                                "not_significant" = "grey")) +
+  labs(title = "Volcano Plot border F vs border R",
+       x = "Log2 Fold Change",
+       y = "-log10 Adjusted p-value") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+borderFvsR_dots <- borderFvsR +
+  geom_point(data=filtered_data,
+             colour="black")
+
+
+borderFvsR_text <- borderFvsR_dots +
+  ggrepel::geom_text_repel(
+    data = filtered_data,
+    aes(label = Gene),
+    size = 4.5,
+    box.padding = unit(0.8, "lines"),
+    point.padding = unit(0.2, "lines"),
+    segment.color = 'grey50',
+    max.overlaps=Inf,
+    force = 1
+  )
+
+print(borderFvsR_text)
+
+
+#DE genes of interest perilesion F vs perilesion R
+
+periF_vs_perirR <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/SingeCell_level_region_comparison/merged_Peri-lesion_foamy-Peri-lesion_ramified.xlsx")
+
+interests <- c("TSPO", "FCGR2A", "FCGR2B", "FCGR1A", "SHANK2","SKI","DDR1","QKI","SBF2","BCAS1","ABCA2","CTTN","NRX1","SHTN1","BOK","MSR1", "SPP1", "ABCA1", "LIPA", "C1QC", "C1QA","IGLL5","IGLC2","CHIT1","FCGR2B","IGLC3","IGLC3","IGHG1","GPNMB","APOC1","FCGR2A","JCHAIN","FABP5","VIM","APOE","CHI3L1","CHI3L2","HLA-DRB1","IGHG3","B2M","AQP4","IGHM","IGHA1","CD99","FTL","C3","C1QB","C1QC","IAH1","UBB","IFNGR1","FTH1")
+
+filtered_data <- dplyr::filter(periF_vs_perirR, Gene %in% interests)
+filtered_data <- subset(filtered_data, p_val_adj <0.05|p_val_adj==0.05)
+
+if (nrow(filtered_data) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data)
+}
+
+
+periF_vs_perirR$color_group <- with(periF_vs_perirR, ifelse(
+  p_val_adj <= 0.05 & avg_log2FC > 0, "up",
+  ifelse(p_val_adj <= 0.05 & avg_log2FC < 0, "down", "not_significant")
+))
+
+periFvsR <- ggplot(periF_vs_perirR, 
+                     aes(x = avg_log2FC, 
+                         y = ifelse(p_val_adj == 0, -log10(1e-10), -log10(p_val_adj)))) +
+  geom_point(aes(color = color_group), alpha = 0.8) +
+  scale_color_manual(values = c("up" = "orange", 
+                                "down" = "lightblue", 
+                                "not_significant" = "grey")) +
+  labs(title = "Volcano Plot peri F vs peri R",
+       x = "Log2 Fold Change",
+       y = "-log10 Adjusted p-value") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+periFvsR_dots <- periFvsR +
+  geom_point(data=filtered_data,
+             colour="black")
+
+
+periFvsR_text <- periFvsR_dots +
+  ggrepel::geom_text_repel(
+    data = filtered_data,
+    aes(label = Gene),
+    size = 4.5,
+    box.padding = unit(0.8, "lines"),
+    point.padding = unit(0.2, "lines"),
+    segment.color = 'grey50',
+    max.overlaps=Inf,
+    force = 1
+  )
+
+print(periFvsR_text)
+
+#DE genes of interest NAWM vs CON WM
+
+
+conWM_vs_NAWM <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/SingeCell_level_region_comparison/vsNAWM/MSvsCON_WM.xlsx")
+
+interests <- c("TSPO", "FCGR2A", "FCGR2B", "FCGR1A", "QKI","SBF2","BCAS1","ABCA2","CTTN","NRX1","BOK","APOD","MSR1", "SPP1", "ABCA1", "LIPA", "C1QC", "C1QA","IGLC2","CHIT1","FCGR2B","IGLC3","IGLC3","IGHG1","GPNMB","HLA-DQB1","FCGR2A","JCHAIN","FABP5","CHI3L1","CHI3L2","HLA-DRB1","IGHG3","B2M","IGHM","CD44","IGHA1","CD99","FTL","C3","C1QB","C1QC","IAH1","UBB","IFNGR1","FTH1","CD68")
+
+filtered_data <- dplyr::filter(conWM_vs_NAWM, gene %in% interests)
+filtered_data <- subset(filtered_data, p_val_adj <0.05|p_val_adj==0.05)
+if (nrow(filtered_data) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data)
+}
+
+
+conWM_vs_NAWM$color_group <- with(conWM_vs_NAWM, ifelse(
+  p_val_adj <= 0.05 & avg_log2FC > 0, "up",
+  ifelse(p_val_adj <= 0.05 & avg_log2FC < 0, "down", "not_significant")
+))
+
+white_matter <- ggplot(conWM_vs_NAWM, 
+                       aes(x = avg_log2FC, 
+                           y = ifelse(p_val_adj == 0, -log10(1e-10), -log10(p_val_adj)))) +
+  geom_point(aes(color = color_group), alpha = 0.8) +
+  scale_color_manual(values = c("up" = "orange", 
+                                "down" = "lightblue", 
+                                "not_significant" = "grey")) +
+  labs(title = "Volcano Plot NAWM vs conWM",
+       x = "Log2 Fold Change",
+       y = "-log10 Adjusted p-value") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+white_matter_dots <- white_matter +
+  geom_point(data=filtered_data,
+             colour="black")
+
+
+white_matter_text <- white_matter_dots +
+  ggrepel::geom_text_repel(
+    data = filtered_data,
+    aes(label = gene),
+    size = 4.5,
+    box.padding = unit(0.8, "lines"),
+    point.padding = unit(0.2, "lines"),
+    segment.color = 'grey50',
+    max.overlaps=Inf,
+    force = 1
+    )
+
+print(white_matter_text)
+
+#DE genes microglia specific
+
+Microglia_comparison_borders <- read.csv("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/SingeCell_level_region_comparison/Microglia_borders/merged_microglia_Border_foamy_vs_Border_ramified.csv")
+
+interests <- c("SHANK2","SKI","CDH4","DDR1","QKI","SBF2","BCAS1","ABCA2","CTTN","NRX1","SHTN1","CTNNB1","BOK","APOD","MSR1", "SPP1", "ABCA1", "LIPA", "C1QC", "C1QA","IGLL5","IGLC2","CHIT1","FCGR2B","IGLC3","IGLC3","IGHG1","GPNMB","HLA-DQB1","APOC1","FCGR2A","JCHAIN","FABP5","IGKC","VIM","APOE","CHI3L1","CHI3L2","HLA-DRB1","IGHG3","B2M","AQP4","IGHM","CD44","IGHA1","CD99","FTL","C3","C1QB","C1QC","IAH1","UBB","IFNGR1","FTH1","CD68")
+
+filtered_data <- dplyr::filter(Microglia_comparison_borders, X %in% interests)
+filtered_data <- subset(filtered_data, p_val_adj <0.05|p_val_adj==0.05)
+
+if (nrow(filtered_data) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data)
+}
+
+
+Microglia_comparison_borders$color_group <- with(Microglia_comparison_borders, ifelse(
+  p_val_adj <= 0.05 & avg_log2FC > 0, "up",
+  ifelse(p_val_adj <= 0.05 & avg_log2FC < 0, "down", "not_significant")
+))
+
+microglia_borders <- ggplot(Microglia_comparison_borders, 
+                   aes(x = avg_log2FC, 
+                       y = ifelse(p_val_adj == 0, -log10(1e-10), -log10(p_val_adj)))) +
+  geom_point(aes(color = color_group), alpha = 0.8) +
+  scale_color_manual(values = c("up" = "orange", 
+                                "down" = "lightblue", 
+                                "not_significant" = "grey")) +
+  labs(title = "Volcano Plot microglia in border foamy vs ramified",
+       x = "Log2 Fold Change",
+       y = "-log10 Adjusted p-value") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+microglia_borders_dots <- microglia_borders +
+  geom_point(data=filtered_data,
+             colour="black")
+
+
+microglia_borders_text <- microglia_borders_dots +
+  ggrepel::geom_text_repel(
+    data = filtered_data,
+    aes(label = X),
+    size = 4.5,
+    box.padding = unit(0.5, "lines"),
+    point.padding = unit(0.5, "lines"),
+    segment.color = 'grey50',
+    max.overlaps=Inf,
+    force = 1
+  )
+
+print(microglia_borders_text)
+
+
+#DE genes oligo specific
+
+Oligo_comparison_borders <- read.csv("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/SingeCell_level_region_comparison/Oligos_borders/merged_oligodendrocytes_Border_foamy-Border_ramified.csv")
+
+interests <- c("SHANK2","SKI","CDH4","DDR1","QKI","SBF2","BCAS1","ABCA2","CTTN","NRX1","SHTN1","CTNNB1","BOK","APOD","MSR1", "SPP1", "ABCA1", "LIPA", "C1QC", "C1QA","IGLL5","IGLC2","CHIT1","FCGR2B","IGLC3","IGLC3","IGHG1","GPNMB","HLA-DQB1","APOC1","FCGR2A","JCHAIN","FABP5","IGKC","VIM","APOE","CHI3L1","CHI3L2","HLA-DRB1","IGHG3","B2M","AQP4","IGHM","CD44","IGHA1","CD99","FTL","C3","C1QB","C1QC","IAH1","UBB","IFNGR1","FTH1","CD68")
+interests <- c("SERPINA3","B2M", "HLA-A", "HLA-B", "HLA-C", "CD74", "HLA-DRA", "HLA-DRB1", "TAP1", "TAP2", "ERAP1", "STAT1", "STAT2", "IRF1", "IRF9", "IFI27", "IFI27L2A", "CD9", "TRF", "VAMP3", "CLDN11", "GSN", "C4B", "Klk6", "CRYAB", "HSP90AA1", "HSPA1A", "DNAJA4", "FOS", "NRF2", "NFE2L2", "UBB", "UBC", "GPX1", "SOD1", "PRDC1", "GPX4", "APOD", "FABP5", "S100A6", "S100A16", "CALM2", "TRF", "SEPP1", "IL6", "IL17", "TNF", "CXCL10", "CXCR3", "OPN", "SPP1", "C1QB", "C4B", "CSF1", "EIF1", "EIF5", "DDIT3", "CCT2", "CCT5", "RPL13", "HSPH1", "HSPA4")
+interests <- c("CD9","APOD", "CD74", "HLA-A", "HLA-C", "HLA-DRA", "HLA-DRB1", "SPP1", "CRYAB", "S100A6", "IFI27", "FABP5", "GPX4", "GSN")
+interests <- c("SERPINA3n")
+
+filtered_data <- dplyr::filter(Oligo_comparison_borders, X %in% interests)
+filtered_data <- subset(filtered_data, p_val_adj <0.05|p_val_adj==0.05)
+
+if (nrow(filtered_data) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data)
+}
+
+
+Oligo_comparison_borders$color_group <- with(Oligo_comparison_borders, ifelse(
+  p_val_adj <= 0.05 & avg_log2FC > 0, "up",
+  ifelse(p_val_adj <= 0.05 & avg_log2FC < 0, "down", "not_significant")
+))
+
+oligo_borders <- ggplot(Oligo_comparison_borders, 
+                            aes(x = avg_log2FC, 
+                                y = ifelse(p_val_adj == 0, -log10(1e-10), -log10(p_val_adj)))) +
+  geom_point(aes(color = color_group), alpha = 0.8) +
+  scale_color_manual(values = c("up" = "orange", 
+                                "down" = "lightblue", 
+                                "not_significant" = "grey")) +
+  labs(title = "Volcano Plot oligos in border foamy vs ramified",
+       x = "Log2 Fold Change",
+       y = "-log10 Adjusted p-value") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+oligo_borders_dots <- oligo_borders +
+  geom_point(data=filtered_data,
+             colour="black")
+
+
+oligo_borders_text <- oligo_borders_dots +
+  ggrepel::geom_text_repel(
+    data = filtered_data,
+    aes(label = X),
+    size = 4.5,
+    box.padding = unit(0.7, "lines"),
+    point.padding = unit(0.8, "lines"),
+    segment.color = 'grey50',
+    max.overlaps=Inf,
+    force = 1
+  )
+
+print(oligo_borders_text)
+
+
+#DE genes of interest NAWM vs border R
+
+NAWM_vs_borderR <- read.csv("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/SingeCell_level_region_comparison/vsNAWM/merged_NAWM-Border_ramified.csv")
+
+interest_good <- c("PTMA","DYNLL1","TF","GLUL","SELENOP","TMBIM6","PEA","MT2A","FAM107A","NDRG2","CPE","PEBP1","CNTN2","CST3","SERF2","CNP","DTNA","DPSYL2","DST","TMSB10","NPAS3","CTNND2","ZBTB20","FEZ1","PTPRD","ITM2B","ERMN","ABCA2","CNTN2","APOD","CLDN11","GLUL", "QKI","PSAP","PTGDS", "MAG", "ERMN","TMBS4X","PIP4K2A","MAGI2")
+interest_bad <- c("GPNMB","IGKC","IGHG1","IGHG3","IGHG4","SPP1","APOE","RNF220","NCAM1","B2M","NEAT1","SPARCL1","FTL","FTH","UBB","APOE","DNAJB1","CHIT1","APOE","APOC1","SORT1","SLC44A1","CLU","CTSD","WWOX","STMN1","RTN4","APP","LGALS1","C3")
+
+filtered_data_good <- dplyr::filter(NAWM_vs_borderR, Gene %in% interest_good)
+filtered_data_good <- subset(filtered_data_good, p_val_adj <0.01|p_val_adj==0.01)
+
+if (nrow(filtered_data_good) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data_good)
+}
+
+filtered_data_bad <- dplyr::filter(NAWM_vs_borderR, Gene %in% interest_bad)
+filtered_data_bad <- subset(filtered_data_bad, p_val_adj <0.01|p_val_adj==0.01)
+
+if (nrow(filtered_data_bad) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data_bad)
+}
+
+#this one is flipped
+NAWMvsborderR <- ggplot(NAWM_vs_borderR, aes(x = -avg_log2FC, y = ifelse(p_val_adj == 0, -log10(1e-10), -log10(p_val_adj)))) +
+  geom_point(aes(color = ifelse(Gene %in% interest_good, "interest_good", p_val_adj <= 0.01)), alpha = 0.8) +
+  scale_color_manual(values = c("TRUE" = "#ffeb4a", "FALSE" = "grey")) +  # Set color for genes of interest
+  labs(title = "Volcano Plot border R vs NAWM",
+       x = "Log2 Fold Change",
+       y = "-log10 Adjusted p-value") +
+  theme_minimal()+
+  theme(legend.position = "none")
+
+NAWMvsborderR_dots <- NAWMvsborderR +
+  geom_point(data=filtered_data_good,
+             colour="darkgreen") +
+  geom_point(data=filtered_data_bad,
+             colour="darkred")
+
+NAWMvsborderR_text <- NAWMvsborderR_dots +
+  ggrepel::geom_text_repel(
+    data = dplyr::filter(NAWM_vs_borderR, Gene %in% interest_good),
+    aes(label = Gene),
+    size = 3,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines"),
+    segment.color = 'grey50',
+    max.overlaps = Inf
+  )+
+  ggrepel::geom_text_repel(
+    data = dplyr::filter(NAWM_vs_borderR, Gene %in% interest_bad),
+    aes(label = Gene),
+    size = 3,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines"),
+    segment.color = 'grey50',
+    max.overlaps=Inf
+  )
+
+print(NAWMvsborderR_text)
+
+
+#DE genes of interest NAWM vs border F
+
+NAWM_vs_borderf <- read.csv("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/SingeCell_level_region_comparison/vsNAWM/merged_NAWM-Border_foamy.csv")
+interest_good <- c("PTMA","DYNLL1","TF","GLUL","SELENOP","TMBIM6","PEA","MT2A","FAM107A","NDRG2","CPE","PEBP1","CNTN2","CST3","SERF2","CNP","DTNA","DPSYL2","DST","TMSB10","NPAS3","CTNND2","ZBTB20","FEZ1","PTPRD","ITM2B","ERMN","ABCA2","CNTN2","APOD","CLDN11","GLUL", "QKI","PSAP","PTGDS", "MAG", "ERMN","TMBS4X","PIP4K2A","MAGI2")
+interest_bad <- c("GPNMB","IGKC","IGHG1","IGHG3","IGHG4","SPP1","APOE","RNF220","NCAM1","B2M","NEAT1","SPARCL1","FTL","FTH","UBB","APOE","DNAJB1","CHIT1","APOE","APOC1","SORT1","SLC44A1","CLU","CTSD","WWOX","STMN1","RTN4","APP","LGALS1","C3")
+
+filtered_data_good <- dplyr::filter(NAWM_vs_borderf, Gene %in% interest_good)
+filtered_data_good <- subset(filtered_data_good, p_val_adj <0.01|p_val_adj==0.01)
+
+if (nrow(filtered_data_good) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data_good)
+}
+
+filtered_data_bad <- dplyr::filter(NAWM_vs_borderf, Gene %in% interest_bad)
+filtered_data_bad <- subset(filtered_data_bad, p_val_adj <0.01|p_val_adj==0.01)
+
+if (nrow(filtered_data_bad) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data_bad)
+}
+
+#this one is flipped
+NAWMvsborderF <- ggplot(NAWM_vs_borderf, aes(x = -avg_log2FC, y = ifelse(p_val_adj == 0, -log10(1e-10), -log10(p_val_adj)))) +
+  geom_point(aes(color = ifelse(Gene %in% interest_good, "interest_good", p_val_adj <= 0.01)), alpha = 0.8) +
+  scale_color_manual(values = c("TRUE" = "#ffeb4a", "FALSE" = "grey")) +  # Set color for genes of interest
+  labs(title = "Volcano Plot border F vs NAWM",
+       x = "Log2 Fold Change",
+       y = "-log10 Adjusted p-value") +
+  theme_minimal()+
+  theme(legend.position = "none")
+
+NAWMvsborderF_dots <- NAWMvsborderF +
+  geom_point(data=filtered_data_good,
+             colour="darkgreen") +
+  geom_point(data=filtered_data_bad,
+             colour="darkred")
+
+NAWMvsborderF_text <- NAWMvsborderF_dots +
+  ggrepel::geom_text_repel(
+    data = dplyr::filter(NAWM_vs_borderf, Gene %in% interest_good),
+    aes(label = Gene),
+    size = 3,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines"),
+    segment.color = 'grey50',
+    max.overlaps = Inf
+  )+
+  ggrepel::geom_text_repel(
+    data = dplyr::filter(NAWM_vs_borderf, Gene %in% interest_bad),
+    aes(label = Gene),
+    size = 3,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines"),
+    segment.color = 'grey50',
+    max.overlaps=Inf
+  )
+
+print(NAWMvsborderF_text)
+
+
+#DE genes of interest NAWM vs peri R
+
+NAWM_vs_periR <- read.csv("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/SingeCell_level_region_comparison/vsNAWM/merged_NAWM-Peri-lesion_ramified.csv")
+interest_good <- c("PTMA","DYNLL1","TF","GLUL","SELENOP","TMBIM6","PEA","MT2A","FAM107A","NDRG2","CPE","PEBP1","CNTN2","CST3","SERF2","CNP","DTNA","DPSYL2","DST","TMSB10","NPAS3","CTNND2","ZBTB20","FEZ1","PTPRD","ITM2B","ERMN","ABCA2","CNTN2","APOD","CLDN11","GLUL", "QKI","PSAP","PTGDS", "MAG", "ERMN","TMBS4X","PIP4K2A","MAGI2")
+interest_bad <- c("GPNMB","IGKC","IGHG1","IGHG3","IGHG4","SPP1","APOE","RNF220","NCAM1","B2M","NEAT1","SPARCL1","FTL","FTH","UBB","APOE","DNAJB1","CHIT1","APOE","APOC1","SORT1","SLC44A1","CLU","CTSD","WWOX","STMN1","RTN4","APP","LGALS1","C3")
+
+filtered_data_good <- dplyr::filter(NAWM_vs_periR, Gene %in% interest_good)
+filtered_data_good <- subset(filtered_data_good, p_val_adj <0.01|p_val_adj==0.01)
+
+if (nrow(filtered_data_good) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data_good)
+}
+
+filtered_data_bad <- dplyr::filter(NAWM_vs_periR, Gene %in% interest_bad)
+filtered_data_bad <- subset(filtered_data_bad, p_val_adj <0.01|p_val_adj==0.01)
+
+if (nrow(filtered_data_bad) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data_bad)
+}
+
+#this is flipped
+NAWMvsperiR <- ggplot(NAWM_vs_periR, aes(x = -avg_log2FC, y = ifelse(p_val_adj == 0, -log10(1e-10), -log10(p_val_adj)))) +
+  geom_point(aes(color = ifelse(Gene %in% interest_good, "interest_good", p_val_adj <= 0.01)), alpha = 0.8) +
+  scale_color_manual(values = c("TRUE" = "#ffeb4a", "FALSE" = "grey")) +  # Set color for genes of interest
+  labs(title = "Volcano Plot peri-lesion R vs NAWM",
+       x = "Log2 Fold Change",
+       y = "-log10 Adjusted p-value") +
+  theme_minimal()+
+  theme(legend.position = "none")
+
+NAWMvsperiR_dots <- NAWMvsperiR +
+  geom_point(data=filtered_data_good,
+             colour="darkgreen") +
+  geom_point(data=filtered_data_bad,
+             colour="darkred")
+
+NAWMvsperiR_text <- NAWMvsperiR_dots +
+  ggrepel::geom_text_repel(
+    data = dplyr::filter(NAWM_vs_periR, Gene %in% interest_good),
+    aes(label = Gene),
+    size = 3,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines"),
+    segment.color = 'grey50',
+    max.overlaps = Inf
+  )+
+  ggrepel::geom_text_repel(
+    data = dplyr::filter(NAWM_vs_periR, Gene %in% interest_bad),
+    aes(label = Gene),
+    size = 3,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines"),
+    segment.color = 'grey50',
+    max.overlaps=Inf
+  )
+
+print(NAWMvsperiR_text)
+
+#DE genes of interest NAWM vs peri F
+
+NAWM_vs_periF <- read.csv("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/SingeCell_level_region_comparison/vsNAWM//merged_NAWM-Peri-lesion_foamy.csv")
+interest_good <- c("PTMA","DYNLL1","TF","GLUL","SELENOP","TMBIM6","PEA","MT2A","FAM107A","NDRG2","CPE","PEBP1","CNTN2","CST3","SERF2","CNP","DTNA","DPSYL2","DST","TMSB10","NPAS3","CTNND2","ZBTB20","FEZ1","PTPRD","ITM2B","ERMN","ABCA2","CNTN2","APOD","CLDN11","GLUL", "QKI","PSAP","PTGDS", "MAG", "ERMN","TMBS4X","PIP4K2A","MAGI2")
+interest_bad <- c("GPNMB","IGKC","IGHG1","IGHG3","IGHG4","SPP1","APOE","RNF220","NCAM1","B2M","NEAT1","SPARCL1","FTL","FTH","UBB","APOE","DNAJB1","CHIT1","APOE","APOC1","SORT1","SLC44A1","CLU","CTSD","WWOX","STMN1","RTN4","APP","LGALS1","C3")
+
+filtered_data_good <- dplyr::filter(NAWM_vs_periF, Gene %in% interest_good)
+filtered_data_good <- subset(filtered_data_good, p_val_adj <0.01|p_val_adj==0.01)
+
+if (nrow(filtered_data_good) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data_good)
+}
+
+filtered_data_bad <- dplyr::filter(NAWM_vs_periF, Gene %in% interest_bad)
+filtered_data_bad <- subset(filtered_data_bad, p_val_adj <0.01|p_val_adj==0.01)
+
+if (nrow(filtered_data_bad) == 0) {
+  cat("No genes of interest found in the dataset.\n")
+} else {
+  cat("Found genes of interest in the dataset:\n")
+  print(filtered_data_bad)
+}
+
+#this is flipped
+NAWMvsperiF <- ggplot(NAWM_vs_periF, aes(x = -avg_log2FC, y = ifelse(p_val_adj == 0, -log10(1e-10), -log10(p_val_adj)))) +
+  geom_point(aes(color = ifelse(Gene %in% interest_good, "interest_good", p_val_adj <= 0.01)), alpha = 0.8) +
+  scale_color_manual(values = c("TRUE" = "#ffeb4a", "FALSE" = "grey")) +  # Set color for genes of interest
+  labs(title = "Volcano Plot peri-lesion F vs NAWM",
+       x = "Log2 Fold Change",
+       y = "-log10 Adjusted p-value") +
+  theme_minimal()+
+  theme(legend.position = "none")
+
+NAWMvsperiF_dots <- NAWMvsperiF +
+  geom_point(data=filtered_data_good,
+             colour="darkgreen") +
+  geom_point(data=filtered_data_bad,
+             colour="darkred")
+
+
+NAWMvsperiF_text <- NAWMvsperiF_dots +
+  ggrepel::geom_text_repel(
+    data = dplyr::filter(NAWM_vs_periF, Gene %in% interest_good),
+    aes(label = Gene),
+    size = 3,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines"),
+    segment.color = 'grey50',
+    max.overlaps = Inf
+  )+
+  ggrepel::geom_text_repel(
+    data = dplyr::filter(NAWM_vs_periF, Gene %in% interest_bad),
+    aes(label = Gene),
+    size = 3,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines"),
+    segment.color = 'grey50',
+    max.overlaps=Inf
+  )
+
+print(NAWMvsperiF_text)
+
+
