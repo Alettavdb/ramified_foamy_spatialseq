@@ -1,0 +1,175 @@
+#GO term enrichment analysis
+
+data_GSEA_border_up <- read_excel("A:/Ramified vs foamy/DE genes pseudobulk/NEW-analysis/David/BorderFvsR_up_GSEA.xlsx", 
+                   sheet = "Selected")
+
+
+data_GSEA_border_up_filtered <- subset(data_GSEA_border_up, Category == "GOTERM_BP_DIRECT" | Category == "GOTERM_MF_DIRECT" | Category == "GOTERM_CC_DIRECT" | Category == "KEGG_PATHWAY" | Category == "UP_KW_BIOLOGICAL_PROCESS" | Category == "UP_KW_DISEASE")
+data_GSEA_border_up_filtered <- data_GSEA_border_up_filtered %>%
+  mutate(Term = reorder(Term, Fold_Enrichment))
+data_GSEA_border_up_filtered$Term <- as.factor(data_GSEA_border_up_filtered$Term)
+
+ggplot(data_GSEA_border_up_filtered, aes(x = Fold_Enrichment, y = Term, color = FDR, size = Count)) +
+  geom_point() +
+  scale_color_gradient(low = "red", high = "blue") + # Adjust color scale as needed
+  labs(title = "Border F vs R up",
+       x = "Fold Enrichment",
+       y = "Term",
+       color = "FDR") +
+  theme_minimal()
+
+
+
+data_GSEA_border_down <- read_excel("A:/Ramified vs foamy/DE genes pseudobulk/NEW-analysis/David/BorderFvsR_down_GSEA.xlsx", 
+                                  sheet = "Selected")
+
+data_GSEA_border_down_filtered <- subset(data_GSEA_border_down, Category == "GOTERM_BP_DIRECT" | Category == "GOTERM_MF_DIRECT" | Category == "GOTERM_CC_DIRECT" | Category == "KEGG_PATHWAY" | Category == "UP_KW_BIOLOGICAL_PROCESS" | Category == "UP_KW_DISEASE")
+data_GSEA_border_down_filtered <- data_GSEA_border_down_filtered %>%
+  mutate(Term = reorder(Term, Fold_Enrichment))
+data_GSEA_border_down_filtered$Term <- as.factor(data_GSEA_border_down_filtered$Term)
+
+ggplot(data_GSEA_border_down_filtered, aes(x = Fold_Enrichment, y = Term, color = FDR, size = Count)) +
+  geom_point() +
+  scale_color_gradient(low = "red", high = "blue") + # Adjust color scale as needed
+  labs(title = "Border F vs R down",
+       x = "Fold Enrichment",
+       y = "Term",
+       color = "FDR") +
+  theme_minimal()
+
+
+data_GSEA_border_combined <- read_excel("A:/Ramified vs foamy/DE genes pseudobulk/NEW-analysis/David/BorderFvsR_GSEA_combined.xlsx")
+
+data_GSEA_border_combined_filtered <- subset(data_GSEA_border_combined, Category == "GOTERM_BP_DIRECT" | Category == "GOTERM_MF_DIRECT" | Category == "GOTERM_CC_DIRECT" | Category == "KEGG_PATHWAY" | Category == "UP_KW_BIOLOGICAL_PROCESS" | Category == "UP_KW_DISEASE")
+data_GSEA_border_combined_filtered <- data_GSEA_border_combined_filtered %>%
+  mutate(Term = reorder(Term, Fold_Enrichment))
+data_GSEA_border_combined_filtered$Term <- as.factor(data_GSEA_border_combined_filtered$Term)
+
+ggplot(data_GSEA_border_combined_filtered, aes(x = Fold_Enrichment, y = Term, color = FDR, size = Count)) +
+  geom_point() +
+  scale_color_gradient(low = "red", high = "blue") + # Adjust color scale as needed
+  labs(title = "Border foamy vs border ramified",
+       x = "Fold Enrichment",
+       y = "Term",
+       color = "FDR") +
+  theme_minimal()
+
+data_GSEA_peri_up <- read_excel("A:/Ramified vs foamy/DE genes pseudobulk/NEW-analysis/David/PeriFvsR_up_GSEA.xlsx", 
+                                    sheet = "Selected")
+
+data_GSEA_peri_up_filtered <- subset(data_GSEA_peri_up, Category == "GOTERM_BP_DIRECT" | Category == "GOTERM_MF_DIRECT" | Category == "GOTERM_CC_DIRECT" | Category == "KEGG_PATHWAY" | Category == "UP_KW_BIOLOGICAL_PROCESS" | Category == "UP_KW_DISEASE")
+data_GSEA_peri_up_filtered <- data_GSEA_peri_up_filtered %>%
+  mutate(Term = reorder(Term, Fold_Enrichment))
+data_GSEA_peri_up_filtered$Term <- as.factor(data_GSEA_peri_up_filtered$Term)
+
+ggplot(data_GSEA_peri_up_filtered, aes(x = Fold_Enrichment, y = Term, color = FDR, size = Count)) +
+  geom_point() +
+  scale_color_gradient(low = "red", high = "blue") + # Adjust color scale as needed
+  labs(title = "Peri F vs R up",
+       x = "Fold Enrichment",
+       y = "Term",
+       color = "FDR") +
+  theme_minimal()
+
+
+
+data_GSEA_peri_down <- read_excel("A:/Ramified vs foamy/DE genes pseudobulk/NEW-analysis/David/PeriFvsR_down_GSEA.xlsx", 
+                                sheet = "Selected")
+
+data_GSEA_peri_down_filtered <- subset(data_GSEA_peri_down, Category == "GOTERM_BP_DIRECT" | Category == "GOTERM_MF_DIRECT" | Category == "GOTERM_CC_DIRECT" | Category == "KEGG_PATHWAY" | Category == "UP_KW_BIOLOGICAL_PROCESS" | Category == "UP_KW_DISEASE")
+data_GSEA_peri_down_filtered <- data_GSEA_peri_down_filtered %>%
+  mutate(Term = reorder(Term, Fold_Enrichment))
+data_GSEA_peri_down_filtered$Term <- as.factor(data_GSEA_peri_down_filtered$Term)
+
+ggplot(data_GSEA_peri_down_filtered, aes(x = Fold_Enrichment, y = Term, color = FDR, size = Count)) +
+  geom_point() +
+  scale_color_gradient(low = "red", high = "blue") + # Adjust color scale as needed
+  labs(title = "Peri F vs R down",
+       x = "Fold Enrichment",
+       y = "Term",
+       color = "FDR") +
+  theme_minimal()
+
+
+
+data_GSEA_peri_combined <- read_excel("A:/Ramified vs foamy/DE genes pseudobulk/NEW-analysis/David/PeriFvsR_GSEA_combined.xlsx")
+
+data_GSEA_peri_combined_filtered <- subset(data_GSEA_peri_combined, Category == "GOTERM_BP_DIRECT" | Category == "GOTERM_MF_DIRECT" | Category == "GOTERM_CC_DIRECT" | Category == "KEGG_PATHWAY" | Category == "UP_KW_BIOLOGICAL_PROCESS" | Category == "UP_KW_DISEASE")
+data_GSEA_peri_combined_filtered <- data_GSEA_peri_combined_filtered %>%
+  mutate(Term = reorder(Term, Fold_Enrichment))
+data_GSEA_peri_combined_filtered$Term <- as.factor(data_GSEA_peri_combined_filtered$Term)
+
+ggplot(data_GSEA_peri_combined_filtered, aes(x = Fold_Enrichment, y = Term, color = FDR, size = Count)) +
+  geom_point() +
+  scale_color_gradient(low = "red", high = "blue") + # Adjust color scale as needed
+  labs(title = "Peri foamy vs ramified",
+       x = "Fold Enrichment",
+       y = "Term",
+       color = "FDR") +
+  theme_minimal()
+
+
+
+
+data_GSEA_foamies <- read_excel("A:/Ramified vs foamy/DE genes pseudobulk/NEW-analysis/PeriBorderVenn/BorderPeriUp_GSEA.xlsx", 
+                                  sheet = "Selected")
+
+data_GSEA_foamies_filtered <- subset(data_GSEA_foamies, Category == "GOTERM_BP_DIRECT" | Category == "GOTERM_MF_DIRECT" | Category == "GOTERM_CC_DIRECT" | Category == "KEGG_PATHWAY" | Category == "UP_KW_BIOLOGICAL_PROCESS" | Category == "UP_KW_DISEASE")
+data_GSEA_foamies_filtered <- data_GSEA_foamies_filtered %>%
+  mutate(Term = reorder(Term, Fold_Enrichment))
+data_GSEA_foamies_filtered$Term <- as.factor(data_GSEA_foamies_filtered$Term)
+
+ggplot(data_GSEA_foamies_filtered, aes(x = Fold_Enrichment, y = Term, color = FDR, size = Count)) +
+  geom_point() +
+  scale_color_gradient(low = "red", high = "blue") + # Adjust color scale as needed
+  labs(title = "Peri and border F vs R up",
+       x = "Fold Enrichment",
+       y = "Term",
+       color = "FDR") +
+  theme_minimal()
+
+
+
+Lympho_GSEA <- read_excel("W:/Spatialseq_project/BGI_RamifiedvsFoamy/Data_analysis/Spatialseq/Lymphocytes/Lympho_GSEA.xlsx", 
+                                sheet = "Selected")
+
+Lympho_GSEA_filtered <- Lympho_GSEA
+Lympho_GSEA_filtered <- Lympho_GSEA_filtered %>%
+  mutate(Term = reorder(Term, Enrichment_Score))
+Lympho_GSEA_filtered$Term <- as.factor(Lympho_GSEA_filtered$Term)
+
+ggplot(Lympho_GSEA_filtered, aes(x = Enrichment_Score, y = Term, color = fdr)) +
+  geom_point() +
+  scale_color_gradient(low = "red", high = "blue") + # Adjust color scale as needed
+  labs(title = "Lymphocytes perivascular vs parenchymal",
+       x = "Fold Enrichment",
+       y = "Term",
+       color = "fdr") +
+  theme_minimal()
+
+
+Lympho_per_region <- read_excel("A:/Ramified vs foamy/Lymph_vasvsnonvas/lymType_byRegion.xlsx", 
+                          sheet = "per donor")
+
+Lympho_glm <- glm(cells_per_mm2 ~ region_vas, family = 'quasipoisson', data=Lympho_per_region)
+anova(Lympho_glm)
+emm <- emmeans(Lympho_glm, "region_vas")
+pairwise_contrasts <- contrast(emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+Lympho_vas <- subset (Lympho_per_region, vasType == "vascular")
+
+Lympho_vas_glm <- glm(cells_per_mm2 ~ region, family = 'quasipoisson', data=Lympho_vas)
+anova(Lympho_vas_glm)
+emm <- emmeans(Lympho_vas_glm, "region")
+pairwise_contrasts <- contrast(emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+Lympho_par <- subset (Lympho_per_region, vasType == "non-vascular")
+
+Lympho_par_glm <- glm(cells_per_mm2 ~ region, family = 'quasipoisson', data=Lympho_par)
+anova(Lympho_par_glm)
+emm <- emmeans(Lympho_par_glm, "region")
+pairwise_contrasts <- contrast(emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
