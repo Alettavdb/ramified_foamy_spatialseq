@@ -1,0 +1,236 @@
+#Using reference azimuth, deconvolute the lymphocytes
+seurat_obj <- readRDS("T:/Lab Absinta/15_ALETTA/Spatial_Seq_paper/CellReports_RB2/lymfo/260203_scRNAseq_Aletta/260203_scRNAseq_Aletta/out/object/analysis_R45/28_Azimuth_lymphocytes_sct20.rds")
+
+seurat_obj@meta.data <- seurat_obj@meta.data %>%
+  mutate(
+    predicted.custom = case_when(
+      predicted.celltype.l2 == "Plasmablast" ~ predicted.celltype.l2,
+      TRUE ~ predicted.celltype.l1
+    )
+  )
+
+DimPlot(
+  seurat_obj,
+  reduction = "ref.umap",
+  group.by = "predicted.custom",
+  label = TRUE,
+  repel = TRUE
+) +
+  ggtitle("Azimuth UMAP")
+
+seurat_obj_highconf <- seurat_obj[, seurat_obj$predicted.custom.score >= 0.5]
+
+plot <- DimPlot(
+  seurat_obj_highconf,
+  reduction = "ref.umap",
+  group.by = "predicted.custom",
+  label = TRUE,
+  repel = TRUE
+) +
+  ggtitle("Azimuth UMAP (confidence ≥ 0.5)")
+
+ggsave(
+  filename = "T:/Lab Absinta/15_ALETTA/Spatial_Seq_paper/CellReports_RB2/lymfo/figures/Azimuth_UMAP_predicted_custom.pdf",
+  plot = plot,
+  width = 8,
+  height = 6
+)
+
+plot2 <- DimPlot(
+  seurat_obj_highconf,
+  reduction = "ref.umap",
+  group.by = "predicted.custom")
+ggsave(
+  filename = "T:/Lab Absinta/15_ALETTA/Spatial_Seq_paper/CellReports_RB2/lymfo/figures/Azimuth_UMAP_predicted_custom_no_text.pdf",
+  plot = plot2,
+  width = 8,
+  height = 6
+)
+
+meta <- seurat_obj@meta.data
+
+meta_test <- meta %>%
+  mutate(
+    predicted.custom = case_when(
+      predicted.celltype.l2 == "Plasmablast" ~ predicted.celltype.l2,
+      TRUE ~ predicted.celltype.l1
+    ),
+    predicted.custom.score = case_when(
+      predicted.celltype.l2 == "Plasmablast" ~ predicted.celltype.l2.score,
+      TRUE ~ predicted.celltype.l1.score
+    )
+  )
+
+# swap the meta
+meta <- meta_test
+
+meta_sub <- subset(meta, predicted.celltype.l1.score > 0.5)
+
+head(meta_sub)
+
+meta_sub$predicted.custom <- as.factor(meta_sub$predicted.custom)
+meta_sub$lymType <- as.factor(meta_sub$lymType)
+table(meta_sub$lymType)
+cluster_list <- levels(meta_sub$predicted.custom)
+
+
+
+#excluding trends, using the new celltype annotation
+# Prepare data subsets
+meta_region <- meta_sub[!is.na(meta_sub$region), ]
+meta_lym <- meta_sub[!is.na(meta_sub$lymType), ]
+meta_region$predicted.custom <- as.factor(meta_region$predicted.custom)
+meta_region$region <- as.factor(meta_region$region)
+meta_lym$predicted.custom <- as.factor(meta_lym$predicted.custom)
+meta_lym$lymType <- as.factor(meta_lym$lymType)
+
+# Lists for looping
+region_list <- levels(meta_region$region)
+cluster_list <- intersect(
+  levels(meta_region$predicted.custom),
+  levels(meta_lym$predicted.custom)
+)
+lym_list <- levels(meta_lym$lymType)
+
+# ----- Region enrichment -----
+combinations_region <- expand.grid(cluster = cluster_list, region = region_list, stringsAsFactors = FALSE)
+
+results_region <- purrr::pmap_dfr(combinations_region, function(cluster, region) {
+  tab <- table(meta_region$predicted.custom == cluster, meta_region$region == region)
+  if (all(dim(tab) == c(2, 2))) {
+    fisher <- fisher.test(tab)
+    p_value <- fisher$p.value
+    odds_ratio <- unname(fisher$estimate)
+  } else {
+    p_value <- NA
+    odds_ratio <- NA
+  }
+  tibble(cluster = cluster,
+         region = region,
+         p_value = p_value,
+         odds_ratio = odds_ratio)
+}) %>%
+  mutate(p_adj = p.adjust(p_value, method = "fdr"),
+         enrichment_type = case_when(
+           p_adj < 0.05 & odds_ratio > 1 ~ "Enriched",
+           p_adj < 0.05 & odds_ratio < 1 ~ "Depleted",
+           TRUE ~ "Not significant"
+         ),
+         type = "region",
+         category = region) %>%
+  select(cluster, category, p_adj, odds_ratio, enrichment_type, type)
+
+# ----- LymType enrichment -----
+combinations_lym <- expand.grid(cluster = cluster_list, lymType = lym_list, stringsAsFactors = FALSE)
+
+results_lymType <- purrr::pmap_dfr(combinations_lym, function(cluster, lymType) {
+  tab <- table(meta_lym$predicted.custom == cluster, meta_lym$lymType == lymType)
+  if (all(dim(tab) == c(2, 2))) {
+    fisher <- fisher.test(tab)
+    p_value <- fisher$p.value
+    odds_ratio <- unname(fisher$estimate)
+  } else {
+    p_value <- NA
+    odds_ratio <- NA
+  }
+  tibble(cluster = cluster,
+         lymType = lymType,
+         p_value = p_value,
+         odds_ratio = odds_ratio)
+}) %>%
+  mutate(p_adj = p.adjust(p_value, method = "fdr"),
+         enrichment_type = case_when(
+           p_adj < 0.05 & odds_ratio > 1 ~ "Enriched",
+           p_adj < 0.05 & odds_ratio < 1 ~ "Depleted",
+           TRUE ~ "Not significant"
+         ),
+         type = "lymType",
+         category = lymType) %>%
+  select(cluster, category, p_adj, odds_ratio, enrichment_type, type)
+
+# ----- Combine results -----
+results_combined <- bind_rows(results_region, results_lymType)
+
+# Fix zero odds ratio for log2 transformation
+results_combined <- results_combined %>%
+  mutate(
+    odds_ratio_adj = ifelse(odds_ratio == 0, 1e-6, odds_ratio),
+    log2_OR = log2(odds_ratio_adj),
+    log2_OR_capped = pmax(pmin(log2_OR, 3), -3)  # cap between -3 and 3
+  )
+
+# Set factor levels for regions to control order
+region_order <- c("NAWM", 
+                  "Border ramified", "Border foamy", 
+                  "Centre ramified", "Centre foamy", 
+                  "Peri-lesion ramified", "Peri-lesion foamy")
+
+results_combined <- results_combined %>%
+  mutate(category = if_else(type == "region",
+                            factor(category, levels = region_order),
+                            factor(category)))
+
+# Reverse cluster order for y axis (optional)
+results_combined <- results_combined %>%
+  mutate(cluster = factor(cluster, levels = rev(sort(unique(cluster)))))
+
+# ----- Plot -----
+ggplot(results_combined, aes(x = category, y = cluster, fill = log2_OR_capped)) +
+  geom_tile(aes(alpha = enrichment_type == "Not significant"), color = "white") +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0, name = "log2(OR)") +
+  scale_alpha_manual(values = c("TRUE" = 0.05, "FALSE" = 1), guide = "none") +
+  facet_grid(. ~ type, scales = "free_x", space = "free_x") +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "bold")
+  ) +
+  labs(
+    title = "Cluster Enrichment across Region and lymType",
+    x = NULL,
+    y = "Cluster"
+  )
+
+#now to compare regions:
+
+
+dist_region <- meta_region %>%
+  group_by(predicted.custom, region) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(predicted.custom) %>%
+  mutate(prop = n / sum(n)) %>%
+  ungroup() %>%
+  rename(
+    cluster = predicted.custom,
+    category = region
+  ) %>%
+  mutate(type = "region")
+
+dist_region <- dist_region %>%
+  mutate(
+    category = factor(category, levels = region_order),
+    cluster = factor(cluster, levels = rev(sort(unique(cluster))))
+  )
+
+ggplot(dist_region, aes(x = category, y = cluster, fill = prop)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(
+    low = "blue",
+    mid = "white",
+    high = "red",
+    midpoint = mean(dist_region$prop),
+    name = "Fraction of cells"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "bold")
+  ) +
+  labs(
+    title = "Distribution of cell types across regions",
+    x = NULL,
+    y = "Cluster"
+  )
+
