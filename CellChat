@@ -1,0 +1,587 @@
+######CellCHat######
+CellChat_borderF <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/Cellchat/Results.xlsx",
+                               sheet = "border_foamy")
+
+CellChat_borderR <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/Cellchat/Results.xlsx",
+                               sheet = "border_rami")
+
+CellChat_periF <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/Cellchat/Results.xlsx",
+                             sheet = "peri_foamy")
+
+CellChat_periR <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/Spatialseq/Cellchat/Results.xlsx",
+                             sheet = "peri_rami")
+
+
+
+unique_sources <- unique(c(CellChat_borderF$source_name, CellChat_borderR$source_name, CellChat_periF$source_name, CellChat_periR$source_name))
+unique_targets <- unique(c(CellChat_borderF$target_name, CellChat_borderR$target_name, CellChat_periF$target_name, CellChat_periR$target_name))
+master_data <- expand.grid(source_name = unique_sources, target_name = unique_targets)
+
+merged_Cellchat_borderF <- merge(master_data, CellChat_borderF, by = c("source_name", "target_name"), all.x = TRUE)
+merged_Cellchat_borderF[is.na(merged_Cellchat_borderF)] <- 0
+merged_Cellchat_borderF$source_name <- factor(merged_Cellchat_borderF$source_name, levels = sort(unique(merged_Cellchat_borderF$source_name)))
+merged_Cellchat_borderF$target_name <- factor(merged_Cellchat_borderF$target_name, levels = sort(unique(merged_Cellchat_borderF$target_name)))
+
+merged_Cellchat_borderR <- merge(master_data, CellChat_borderR, by = c("source_name", "target_name"), all.x = TRUE)
+merged_Cellchat_borderR[is.na(merged_Cellchat_borderR)] <- 0
+merged_Cellchat_borderR$source_name <- factor(merged_Cellchat_borderR$source_name, levels = sort(unique(merged_Cellchat_borderR$source_name)))
+merged_Cellchat_borderR$target_name <- factor(merged_Cellchat_borderR$target_name, levels = sort(unique(merged_Cellchat_borderR$target_name)))
+
+merged_Cellchat_periF <- merge(master_data, CellChat_periF, by = c("source_name", "target_name"), all.x = TRUE)
+merged_Cellchat_periF[is.na(merged_Cellchat_periF)] <- 0
+merged_Cellchat_periF$source_name <- factor(merged_Cellchat_periF$source_name, levels = sort(unique(merged_Cellchat_periF$source_name)))
+merged_Cellchat_periF$target_name <- factor(merged_Cellchat_periF$target_name, levels = sort(unique(merged_Cellchat_periF$target_name)))
+
+merged_Cellchat_periR <- merge(master_data, CellChat_periR, by = c("source_name", "target_name"), all.x = TRUE)
+merged_Cellchat_periR[is.na(merged_Cellchat_periR)] <- 0
+merged_Cellchat_periR$source_name <- factor(merged_Cellchat_periR$source_name, levels = sort(unique(merged_Cellchat_periR$source_name)))
+merged_Cellchat_periR$target_name <- factor(merged_Cellchat_periR$target_name, levels = sort(unique(merged_Cellchat_periR$target_name)))
+
+
+
+summary_data <- merged_Cellchat_borderF %>%
+  group_by(source_name, target_name) %>%
+  dplyr::summarize(frequency = n()) %>%
+  ungroup()
+
+cell_types <- unique(c(summary_data$source_name, summary_data$target_name))
+color_palette <- colorRampPalette(RColorBrewer::brewer.pal(8, "Paired"))(length(cell_types))
+names(color_palette) <- cell_types
+
+# Create the chord diagram
+chordDiagram(
+  summary_data,
+  directional = FALSE,  # Disable directional arrows
+  transparency = 0.5,
+  annotationTrack = "grid",
+  preAllocateTracks = list(track.height = 0.1),
+  grid.col = color_palette
+)
+
+# Loop through summary_data to customize line widths
+for (i in 1:nrow(summary_data)) {
+  circos.link(
+    sector.index1 = summary_data$source_name[i],
+    sector.index2 = summary_data$target_name[i],
+    col = color_palette[summary_data$source_name[i]],  # Use color based on source
+    lwd = summary_data$frequency[i] * 0.5  # Scale the width if necessary
+  )
+}
+
+
+
+
+
+
+summary_data <- merged_Cellchat_borderR %>%
+  group_by(source_name, target_name) %>%
+  dplyr::summarize(frequency = n()) %>%
+  ungroup()
+
+cell_types <- unique(c(summary_data$source_name, summary_data$target_name))
+color_palette <- colorRampPalette(RColorBrewer::brewer.pal(8, "Paired"))(length(cell_types))
+names(color_palette) <- cell_types
+
+chordDiagram(
+  summary_data,
+  directional = FALSE,
+  direction.type = c("diffHeight", "arrows"),
+  diffHeight  = -0.04,
+  transparency = 0.5,
+  annotationTrack = "grid",
+  preAllocateTracks = list(track.height = 0.1),
+  grid.col = color_palette,
+  legend("right", legend = names(color_palette), col = color_palette, pch = 15, pt.cex = 1.5, cex = 0.8, bty = "n")
+)
+
+
+
+summary_data <- merged_Cellchat_periF %>%
+  group_by(source_name, target_name) %>%
+  dplyr::summarize(frequency = n()) %>%
+  ungroup()
+
+cell_types <- unique(c(summary_data$source_name, summary_data$target_name))
+color_palette <- colorRampPalette(RColorBrewer::brewer.pal(8, "Paired"))(length(cell_types))
+names(color_palette) <- cell_types
+
+chordDiagram(
+  summary_data,
+  directional = FALSE,
+  direction.type = c("diffHeight", "arrows"),
+  diffHeight  = -0.04,
+  transparency = 0.5,
+  annotationTrack = "grid",
+  preAllocateTracks = list(track.height = 0.1),
+  grid.col = color_palette,
+  legend("right", legend = names(color_palette), col = color_palette, pch = 15, pt.cex = 1.5, cex = 0.8, bty = "n")
+)
+
+
+
+summary_data <- merged_Cellchat_periR %>%
+  group_by(source_name, target_name) %>%
+  dplyr::summarize(frequency = n()) %>%
+  ungroup()
+
+cell_types <- unique(c(summary_data$source_name, summary_data$target_name))
+color_palette <- colorRampPalette(RColorBrewer::brewer.pal(8, "Paired"))(length(cell_types))
+names(color_palette) <- cell_types
+
+chordDiagram(
+  summary_data,
+  directional = FALSE,
+  direction.type = c("diffHeight", "arrows"),
+  diffHeight  = -0.04,
+  transparency = 0.5,
+  annotationTrack = "grid",
+  preAllocateTracks = list(track.height = 0.1),
+  grid.col = color_palette,
+  legend("right", legend = names(color_palette), col = color_palette, pch = 15, pt.cex = 1.5, cex = 0.8, bty = "n")
+)
+
+summary_CellChat_borderF_donoronly<- CellChat_borderF %>%
+  group_by(Donor) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_borderF_donor<- CellChat_borderF %>%
+  group_by(Donor, source_name, target_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_borderF <- CellChat_borderF %>%
+  group_by(source_name, target_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_borderF_interaction <- CellChat_borderF %>%
+  group_by(source_name, target_name, interaction_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_borderF_interaction_only <- CellChat_borderF %>%
+  group_by(interaction_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+heatmap_borderF <- with(CellChat_borderF, table (source_name, target_name))
+heatmap_borderF_norm<-as.table(t(apply(heatmap_borderF,1,function(x) x/sum(x))))
+heatmap_borderF_merged <-with(merged_Cellchat_borderF, table (source_name, target_name))
+
+ggplot(data=as.data.frame(heatmap_borderF), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_borderF)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_borderF),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Border foamy", x= "target", x="source")
+
+ggplot(data=as.data.frame(heatmap_borderF_norm), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_borderF_norm)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_borderF),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Border foamy normalized", x= "target", x="source")
+
+ggplot(data=as.data.frame(heatmap_borderF_merged), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_borderF_merged)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_borderF_merged-1),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Border foamy", x= "target", x="source")
+
+summary_CellChat_borderR_donoronly<- CellChat_borderR %>%
+  group_by(Donor) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_borderR_donor<- CellChat_borderR %>%
+  group_by(Donor, source_name, target_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_borderR <- CellChat_borderR %>%
+  group_by(source_name, target_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_borderR_interaction <- CellChat_borderR %>%
+  group_by(source_name, target_name, interaction_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_borderR_interaction_only <- CellChat_borderR %>%
+  group_by(interaction_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+
+heatmap_borderR <- with(CellChat_borderR, table (source_name, target_name))
+heatmap_borderR_norm<-as.table(t(apply(heatmap_borderR,1,function(x) x/sum(x))))
+heatmap_borderR_merged <-with(merged_Cellchat_borderR, table (source_name, target_name))
+
+ggplot(data=as.data.frame(heatmap_borderR), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_borderR)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_borderR),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Border ramified", x= "target", x="source")
+
+ggplot(data=as.data.frame(heatmap_borderR_norm), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_borderR_norm)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_borderR),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Border ramified normalized", x= "target", x="source")
+
+ggplot(data=as.data.frame(heatmap_borderR_merged), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_borderR_merged)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_borderR_merged-1),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Border ramified", x= "target", x="source")
+
+summary_CellChat_periF_donoronly<- CellChat_periF %>%
+  group_by(Donor) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_periF_donor<- CellChat_periF %>%
+  group_by(Donor, source_name, target_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_periF<- CellChat_periF %>%
+  group_by(source_name, target_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_periF_interaction <- CellChat_periF %>%
+  group_by(source_name, target_name, interaction_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_periF_interaction_only <- CellChat_periF %>%
+  group_by(interaction_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+
+heatmap_periF <- with(CellChat_periF, table (source_name, target_name))
+heatmap_periF_norm<-as.table(t(apply(heatmap_periF,1,function(x) x/sum(x))))
+heatmap_periF_merged <-with(merged_Cellchat_periF, table (source_name, target_name))
+
+ggplot(data=as.data.frame(heatmap_periF), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_periF)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_periF),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Perilesion foamy", x= "target", x="source")
+
+ggplot(data=as.data.frame(heatmap_periF_norm), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_periF_norm)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_periF),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Perilesion foamy normalized", x= "target", x="source")
+
+ggplot(data=as.data.frame(heatmap_periF_merged), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_periF_merged)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_periF_merged-1),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Perilesion foamy", x= "target", x="source")
+
+
+summary_CellChat_periR_donoronly<- CellChat_periR %>%
+  group_by(Donor) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_periR_donor<- CellChat_periR %>%
+  group_by(Donor, source_name, target_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_periR<- CellChat_periR %>%
+  group_by(source_name, target_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_periR_interaction <- CellChat_periR %>%
+  group_by(source_name, target_name, interaction_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+summary_CellChat_periR_interaction_only <- CellChat_periR %>%
+  group_by(interaction_name) %>%
+  summarise(Count = n()) %>%
+  ungroup()
+
+
+heatmap_periR <- with(CellChat_periR, table (source_name, target_name))
+heatmap_periR_norm<-as.table(t(apply(heatmap_periR,1,function(x) x/sum(x))))
+heatmap_periR_merged <-with(merged_Cellchat_periR, table (source_name, target_name))
+
+ggplot(data=as.data.frame(heatmap_periR), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_periR)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_periR),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Perilesion ramified", x= "target", x="source")
+
+ggplot(data=as.data.frame(heatmap_periR_norm), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_periR_norm)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_periR),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Perilesion ramified normalized", x= "target", x="source")
+
+ggplot(data=as.data.frame(heatmap_periR_merged), aes(x=target_name, y=source_name, fill=as.numeric(heatmap_periR_merged)))+
+  geom_tile()+
+  geom_text(aes(label = round(as.numeric(heatmap_periR_merged-1),2)),color="black",size=3)+
+  scale_fill_gradient(low="white",high="red")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle=45, hjust=1))+
+  labs(title="Perilesion ramified", x= "target", x="source")
+
+####CREATE BARPLOTS OF ALL RECEPTOR LIGAND PAIRS
+
+CellChat_receptor_ligands <- read_excel("A:/Ramified vs foamy/Cellchat/Results.xlsx",
+                               sheet = "Receptor_ligands")
+
+df_ordered <- CellChat_receptor_ligands[order(CellChat_receptor_ligands$Sum, decreasing = TRUE), ]
+df_top35 <- head(df_ordered, 35)
+df_36to65 <- df_ordered[36:65, ]
+
+df_long_top35 <- tidyr::gather(df_top35, key = "variable", value = "value", -interaction_name, -Sum)
+df_long_36to65 <- tidyr::gather(df_36to65, key = "variable", value = "value", -interaction_name, -Sum)
+
+ggplot(df_long_top35, aes(x = reorder(interaction_name, -Sum), y = value, fill = variable)) +
+  geom_bar(stat = "identity", color="black", position = "dodge") +
+  labs(x = "Interaction name", y = "Number of interactions") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("BorderF" = "cornflowerblue", "BorderR" = "chartreuse4", "PeriF" = "darkorange", "PeriR" = "darkorchid3")) +
+  ggtitle("Bar Plot of Top 1-35 Interaction Names by Sum")+
+  coord_flip()+
+  theme_minimal()
+ggplot(df_long_36to65, aes(x = reorder(interaction_name, -Sum), y = value, fill = variable)) +
+  geom_bar(stat = "identity", color="black", position = "dodge") +
+  labs(x = "Interaction name", y = "Number of interactions") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("BorderF" = "cornflowerblue", "BorderR" = "chartreuse4", "PeriF" = "darkorange", "PeriR" = "darkorchid3")) +
+  ggtitle("Bar Plot of Top 36-65 Interaction Names by Sum")+
+  coord_flip()+
+  theme_minimal()
+
+
+
+
+
+#Top 10 receptor-ligand pairs and the major cell-types
+
+CellChat_all <- read_excel("A:/Ramified vs foamy/Cellchat/Results.xlsx",
+                           sheet = "All")
+
+# Calculate the frequency of each interaction_name
+interaction_freq <- CellChat_all %>%
+  group_by(interaction_name) %>%
+  summarise(frequency = n()) %>%
+  arrange(desc(frequency))  # Arrange in descending order of frequency
+
+# Select the top 10 interaction_names
+top_10_interaction <- interaction_freq$interaction_name[1:10]
+
+# Create a subset of the dataframe with the top 10 interaction_names
+subset_df <- CellChat_all[CellChat_all$interaction_name %in% top_10_interaction, ]
+
+
+heatmap_data <- subset_df %>%
+  group_by(interaction_name, source_target_major) %>%
+  summarise(frequency = n())
+
+ggplot(heatmap_data, aes(x = interaction_name, y = source_target_major, fill = frequency)) +
+  geom_tile() +
+  scale_fill_gradient(low = "azure1", high = "blue") +
+  labs(x = "Interaction Name", y = "Source Target") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  ggtitle("Heatmap of Interaction Name vs. Source Target Frequency")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+
+
+####PLOT INTERACTIONS OF INTEREST
+
+CellChat_all <- read_excel("A:/Ramified vs foamy/Cellchat/Results.xlsx",
+                                        sheet = "All")
+
+interaction_freq <- CellChat_all %>%
+  group_by(interaction_name) %>%
+  summarise(frequency = n()) %>%
+  arrange(desc(frequency))  # Arrange in descending order of frequency
+
+invest <- 'CLDN11_CLDN11'
+interest <- subset(CellChat_all, interaction_name == invest)
+
+for( i in 1:length(interaction_freq$interaction_name)){
+  
+  invest <- unique(interaction_freq$interaction_name)[i]
+  interest <- subset(CellChat_all, interaction_name == invest)
+  
+  
+  freq_table <- table(interest$source_name, interest$target_name)
+  df_freq <- as.data.frame(as.table(freq_table))
+  colnames(df_freq) <- c("Source_name", "Target_name", "frequency")
+  target_type_sum <- aggregate(frequency ~ Target_name, data = df_freq, sum)
+  df_freq_merged <- merge(df_freq, target_type_sum, by = "Target_name", suffixes = c("", "_sum"))
+  df_freq_normalized <- df_freq_merged
+  df_freq_normalized$frequency <- df_freq_merged$frequency / df_freq_merged$frequency_sum
+  
+  plot <- ggplot(df_freq_normalized, aes(x = Target_name, y = Source_name, fill = frequency)) +
+    geom_tile() +
+    geom_text(aes(label = round(as.numeric(freq_table),2)),color="black",size=3)+
+    scale_fill_gradient(low = "azure1", high = "blue") +
+    labs(x = "Target Type", y = "Source Type", fill = "Normalized Frequency", title = invest) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  ggsave(paste0("A:/Ramified vs foamy/Cellchat/ligands_per_type/norm/",i,"_", invest, ".png"), plot = plot, device = "png")
+  
+}
+
+
+
+#NOT NORMALISED
+
+#MAJOR CELL TYPES
+
+invest <- 'CLDN11_CLDN11'
+interest <- subset(CellChat_all, interaction_name == invest)
+
+interaction_freq <- CellChat_all %>%
+  group_by(interaction_name) %>%
+  summarise(frequency = n()) %>%
+  arrange(desc(frequency))  # Arrange in descending order of frequency
+
+freq_table <- table(interest$Source_major, interest$Target_major)
+df_freq <- as.data.frame(as.table(freq_table))
+colnames(df_freq) <- c("Source_major", "Target_major", "frequency")
+
+ggplot(df_freq, aes(x = Target_major, y = Source_major, fill = frequency)) +
+  geom_tile() +
+  geom_text(aes(label = round(as.numeric(freq_table),2)),color="black",size=3)+
+  scale_fill_gradient(low = "azure1", high = "blue") +  # Adjust the color gradient as needed
+  labs(x = "Target Type", y = "Source Type", fill = "Frequency", title= invest) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+#CELLSTATES
+
+interaction_freq <- CellChat_all %>%
+  group_by(interaction_name) %>%
+  summarise(frequency = n()) %>%
+  arrange(desc(frequency))  # Arrange in descending order of frequency
+
+for( i in 1:length(interaction_freq$interaction_name)){
+  invest <- unique(interaction_freq$interaction_name)[i]
+  interest <- subset(CellChat_all, interaction_name == invest)
+  
+  freq_table <- table(interest$source_name, interest$target_name)
+  df_freq <- as.data.frame(as.table(freq_table))
+  colnames(df_freq) <- c("Source_name", "Target_name", "frequency")
+  plot <- ggplot(df_freq, aes(x = Target_name, y = Source_name, fill = frequency)) +
+    geom_tile() +
+    geom_text(aes(label = round(as.numeric(freq_table),2)),color="black",size=3)+
+        scale_fill_gradient(low = "azure1", high = "blue") +  # Adjust the color gradient as needed
+    labs(x = "Target Type", y = "Source Type", fill = "Frequency", title= invest) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  ggsave(paste0("A:/Ramified vs foamy/Cellchat/ligands_per_type/not_norm/",i,"_not_norm_", invest, ".png"), plot = plot, device = "png")
+  
+}
+
+
+
+freq_table <- table(interest$source_name, interest$target_name)
+df_freq <- as.data.frame(as.table(freq_table))
+colnames(df_freq) <- c("Source_name", "Target_name", "frequency")
+target_type_sum <- aggregate(frequency ~ Target_name, data = df_freq, sum)
+df_freq_merged <- merge(df_freq, target_type_sum, by = "Target_name", suffixes = c("", "_sum"))
+df_freq_normalized <- df_freq_merged
+df_freq_normalized$frequency <- df_freq_merged$frequency / df_freq_merged$frequency_sum
+
+ggplot(df_freq_normalized, aes(x = Target_name, y = Source_name, fill = frequency)) +
+  geom_tile() +
+  geom_text(aes(label = round(as.numeric(freq_table),2)),color="black",size=3)+
+  scale_fill_gradient(low = "azure1", high = "blue") +
+  labs(x = "Target Type", y = "Source Type", fill = "Normalized Frequency", title = invest) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+#ONLY SPECIFIC REGION
+
+#CELLSTATES
+interest_state <- subset(interest, Where == 'BorderF')
+freq_table <- table(interest_state$source_name, interest_state$target_name)
+df_freq <- as.data.frame(as.table(freq_table))
+colnames(df_freq) <- c("Source_name", "Target_name", "frequency")
+ggplot(df_freq, aes(x = Target_name, y = Source_name, fill = frequency)) +
+  geom_tile() +
+  scale_fill_gradient(low = "azure1", high = "blue") +  # Adjust the color gradient as needed
+  scale = "column" +
+  labs(x = "Target Type", y = "Source Type", fill = "Frequency", title= paste0(invest, " ", 'BorderF')) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#CELLSTATES
+interest_state <- subset(interest, Where == 'BorderR')
+freq_table <- table(interest_state$source_name, interest_state$target_name)
+df_freq <- as.data.frame(as.table(freq_table))
+colnames(df_freq) <- c("Source_name", "Target_name", "frequency")
+ggplot(df_freq, aes(x = Target_name, y = Source_name, fill = frequency)) +
+  geom_tile() +
+  scale_fill_gradient(low = "azure1", high = "blue") +  # Adjust the color gradient as needed
+  labs(x = "Target Type", y = "Source Type", fill = "Frequency", title= paste0(invest, " ", 'BorderR')) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#CELLSTATES
+interest_state <- subset(interest, Where == 'PeriF')
+freq_table <- table(interest_state$source_name, interest_state$target_name)
+df_freq <- as.data.frame(as.table(freq_table))
+colnames(df_freq) <- c("Source_name", "Target_name", "frequency")
+ggplot(df_freq, aes(x = Target_name, y = Source_name, fill = frequency)) +
+  geom_tile() +
+  scale_fill_gradient(low = "azure1", high = "blue") +  # Adjust the color gradient as needed
+  labs(x = "Target Type", y = "Source Type", fill = "Frequency", title= paste0(invest, " ", 'PeriF')) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#CELLSTATES
+interest_state <- subset(interest, Where == 'PeriR')
+freq_table <- table(interest_state$source_name, interest_state$target_name)
+df_freq <- as.data.frame(as.table(freq_table))
+colnames(df_freq) <- c("Source_name", "Target_name", "frequency")
+ggplot(df_freq, aes(x = Target_name, y = Source_name, fill = frequency)) +
+  geom_tile() +
+  scale_fill_gradient(low = "azure1", high = "blue") +  # Adjust the color gradient as needed
+  labs(x = "Target Type", y = "Source Type", fill = "Frequency", title= paste0(invest, " ", 'PeriR')) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
