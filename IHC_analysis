@@ -74,3 +74,19 @@ B2M_glm <- glm(B2M_per_mm2 ~ Name, family = 'quasipoisson', data=B2M_SOX10)
 emm <- emmeans(B2M_glm, "Name")+++++
 pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
 summary(pairwise_contrasts)
+
+
+#Cellchat validation
+analysis <- read_excel("analysis.xlsx")
+PSAP_glm <- glm(PSAPperc ~ Region_classification, family = 'quasipoisson', data=analysis)
+anova(PSAP_glm)
+emm <- emmeans(PSAP_glm, "Region_classification")
+pairwise_contrasts <- contrast(emm,method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+GPR_glm <- glm(GPR37perc ~ Region_classification, family = 'quasipoisson', data=analysis)
+anova(GPR_glm)
+emm <- emmeans(GPR_glm, "Region_classification")
+pairwise_contrasts <- contrast(emm,method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
