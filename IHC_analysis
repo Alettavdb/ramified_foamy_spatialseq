@@ -1,0 +1,76 @@
+#DE GENES VALIDATION
+
+#Ferritin
+FTH <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/IHC/DEs/Results.xlsx",
+                  sheet = "Ferritin")
+
+
+FTH_glm <- glm(FTHpos_per_mm ~ Region, family = 'quasipoisson', data=FTH)
+emm <- emmeans(FTH_glm, "Region")
+pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+FTH_noHLA_glm <- glm(HLAnegFTHpos_per_mm ~ Region, family = 'quasipoisson', data=FTH)
+emm <- emmeans(FTH_noHLA_glm, "Region")
+pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+FTH_HLA_glm <- glm(HLAposFTHpos_per_mm ~ Region, family = 'quasipoisson', data=FTH)
+emm <- emmeans(FTH_HLA_glm, "Region")
+pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+#CD79A_IGG
+CD79A_IGG <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/IHC/DEs/Results.xlsx",
+                  sheet = "CD79A_IGG")
+
+CD79A_IGG_glm <- glm(CD79A_IGG_mm2 ~ Name, family = 'quasipoisson', data=CD79A_IGG)
+emm <- emmeans(CD79A_IGG_glm, "Name")
+pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+CD79A_glm <- glm(CD79A_total_mm2 ~ Name, family = 'quasipoisson', data=CD79A_IGG)
+emm <- emmeans(CD79A_glm, "Name")
+pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+#ABCA2
+ABCA2_SOX10 <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/IHC/DEs/Results.xlsx",
+                        sheet = "ABCA2_SOX10")
+
+ABCA2_SOX10_glm <- glm(ABCA2_SOX10_per_mm2 ~ Name, family = 'quasipoisson', data=ABCA2_SOX10)
+emm <- emmeans(ABCA2_SOX10_glm, "Name")
+pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+ABCA2_SOX10_perc_glm <- glm(Sox10_perc_ABCA ~ Name, family = 'quasipoisson', data=ABCA2_SOX10)
+emm <- emmeans(ABCA2_SOX10_perc_glm, "Name")
+pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+
+#QKI
+
+QKI_SOX10 <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/IHC/DEs/Results.xlsx",
+                          sheet = "QKI_SOX10")
+
+QKI_SOX10_glm <- glm(doubles_per_mm2 ~ Name, family = 'quasipoisson', data=QKI_SOX10)
+emm <- emmeans(QKI_SOX10_glm, "Name")
+pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+
+#B2M
+
+B2M_SOX10 <- read_excel("//vs03/VS03-IMM-2/Spatialseq_project/BGI_RamifiedvsFoamy/Data_Analysis/IHC/DEs/Results.xlsx",
+                      sheet = "B2M_SOX10")
+
+B2M_SOX10_glm <- glm(Double_per_mm2 ~ Name, family = 'quasipoisson', data=B2M_SOX10)
+emm <- emmeans(B2M_SOX10_glm, "Name")
+pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
+
+
+B2M_glm <- glm(B2M_per_mm2 ~ Name, family = 'quasipoisson', data=B2M_SOX10)
+emm <- emmeans(B2M_glm, "Name")+++++
+pairwise_contrasts <- contrast (emm, method = "pairwise", adjust = "fdr")
+summary(pairwise_contrasts)
